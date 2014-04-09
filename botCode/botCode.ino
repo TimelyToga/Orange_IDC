@@ -6,7 +6,7 @@
   Servo servoRight;
   double setpoint, input;
   boolean prevOverHash, overHash = false;
-  int hashCount = 0;
+  int hashCount = 3;
   int points = 0;
   int pointLED = 9;
   int stopPos = 0;
@@ -95,18 +95,20 @@ long computeInput(){
   else if(hashCount==4){ // COMMUNICATION CODE GOES HERE
     // Set the position number and communicate
     stopPos = 6-points;
+    Xbee.begin(9600);
     if(!finishMoving){
       communicate(stopPos);
     } else {
       finishTheJob(stopPos);
     }
-    maneuver(100,100);
-    delay(200);
     servoLeft.detach();
     servoRight.detach();
     digitalWrite(pointLED, HIGH);
   }
   else if(hashCount > 4){
+    
+    passItAlong(6-points);
+    
     if (stopPos==0){
       servoLeft.detach();
       servoRight.detach();
@@ -245,7 +247,6 @@ void stopAndReport(int blinkNum){
 }
 
 void communicate(int posNum){
-  Xbee.begin(9600);
   if(Xbee.available()) { // Is data available from XBee? 
     char incoming = Xbee.read(); // Read character, 
     if(incoming == posNum - 1){
@@ -253,8 +254,16 @@ void communicate(int posNum){
     }
     Serial.println(incoming); // send to Serial Monitor 
   } 
+  delay(500);
+  finishMoving = true;
 }
 
 void finishTheJob(int posNum){
-
+  // Have received the go ahead, blink and then drive forward. 
+  // Line following should continue forward.
+  blinker(1);
+  delay(200);
+  servoLeft.attach(13);
+  servoRight.attach(12);
+  manuever(100,100);
 }
