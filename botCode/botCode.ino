@@ -1,5 +1,7 @@
-  byte QTIpins[] = {3, 7, 5, 8};
+  #include <SoftwareSerial.h> 
   #include <Servo.h> 
+  
+  byte QTIpins[] = {3, 7, 5, 8};
   Servo servoLeft; 
   Servo servoRight;
   double setpoint, input;
@@ -12,7 +14,11 @@
   boolean allOutputs = false;
   boolean notFailed = true;
 
+// Communication variables
+  #define Rx 10 // DOUT to pin 10 
+  #define Tx 11 // DIN to pin 11
   boolean finishMoving = false;
+  SoftwareSerial Xbee (Rx, Tx); 
 
   void setup(){
     Serial.begin(9600);
@@ -92,7 +98,7 @@ long computeInput(){
     if(!finishMoving){
       communicate(stopPos);
     } else {
-      finishTheJob();
+      finishTheJob(stopPos);
     }
     maneuver(100,100);
     delay(200);
